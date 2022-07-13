@@ -1,3 +1,8 @@
+const nodeFont = '10px arial';
+const nodeRadius = 20;
+const nodeFill = "#9E6240";
+const nodeStroke = "#DEA47E";
+const textColor = "#FFF";
 
 class Circle {
     constructor(xPos, yPos, radius, fillColor, strokeColor, strokeWidth) {
@@ -21,6 +26,29 @@ class Circle {
     }
 }
 
+class Node {
+    constructor(xPos, yPos, name) {
+        this.x = xPos;
+        this.y = yPos;
+        this.name = name;
+        this.circle;
+    }
+
+    Draw(context) {
+        if(this.circle == undefined) {
+            this.circle = new Circle(this.x, this.y, nodeRadius, nodeFill, nodeStroke, 5);
+        } else {
+            this.circle.x = this.x;
+            this.circle.y = this.y;
+        }
+        this.circle.Draw(context);
+
+        context.font = nodeFont;
+        context.fillStyle = textColor;
+        context.fillText(this.name, this.x, this.y);
+    }
+}
+
 class Transition {
     constructor(startNodeIndex, endNodeIndex, startXPos, startYPos, endXPos, endYPos) {
         this.startNodeIndex = startNodeIndex;
@@ -36,7 +64,6 @@ class Transition {
     Draw(context) {
         context.beginPath();
         context.moveTo(this.startXPos, this.startYPos);
-        // context.lineTo(endXPos, endYPos); // Straight line (boring)
 
         let controlPointXPos, controlPointYPos;
 
@@ -66,7 +93,7 @@ class Transition {
         const xVectorCoordenate = this.endXPos - this.startXPos;
         const yVectorCoordenate = this.endYPos - this.startYPos;
         const distance = Math.sqrt(Math.pow(xVectorCoordenate, 2) + Math.pow(yVectorCoordenate, 2));
-        const radius = distance / 2;
+        const radius = distance / 4;
         const angle = Math.asin((this.endYPos - this.startYPos) / distance);
 
         const xOffset = this.startXPos + xVectorCoordenate / 2;
@@ -78,3 +105,4 @@ class Transition {
         return [controlPointXPos, controlPointYPos];
     }
 }
+

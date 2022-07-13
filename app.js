@@ -1,31 +1,32 @@
-const nodeRadius = 25;
-
 let canvasWidth = 0;
 let canvasHeight = 0;
 
 // Internal states of the machine
 let states = [
     {
-        xPos: 100,
-        yPos: 100,
+        name: "0",
+        x: 100,
+        y: 100,
         transitions: [
-            1,
-            2,
+            1, 2
         ],
     },
     {
-        xPos: 350,
-        yPos: 250,
-        transitions: [0],
-    },
-    {
-        xPos: 100,
-        yPos: 500,
+        name: "1",
+        x: 100,
+        y: 400,
         transitions: [],
     },
     {
-        xPos: 500,
-        yPos: 100,
+        name: "2",
+        x: 400,
+        y: 400,
+        transitions: [],
+    },
+    {
+        name: "3",
+        x: 100,
+        y: 400,
         transitions: [],
     },
 ]
@@ -37,12 +38,13 @@ let transitions = []
 window.addEventListener("load", () => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
-
     canvas.width = window.innerWidth - 50;
     canvas.height = window.innerHeight - 50;
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
 
+   // canvas.addEventListener( 'wheel', (e) => adjustZoom(e.deltaY*SCROLL_SENSITIVITY))
+    
     let dragging = -1;
     
     DrawTransitionLines(context);
@@ -65,7 +67,7 @@ window.addEventListener("load", () => {
 
     function ClickedNode(x, y) {
         nodes.forEach((node, index) => {
-            if(utils.circlePointCollision(x, y, node)) {
+            if(utils.circlePointCollision(x, y, node.circle)) {
                 dragging = index;
             } 
         });
@@ -89,12 +91,12 @@ window.addEventListener("load", () => {
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
     
-            states[dragging].xPos = x;
-            states[dragging].yPos = y;
+            states[dragging].x = x;
+            states[dragging].y = y;
 
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             UpdateTransitionLines(context);
-            DrawNodes(context);
+            UpdateNodes(context);
         }
 
     }
@@ -112,7 +114,7 @@ window.addEventListener("load", () => {
 
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             UpdateTransitionLines(context);
-            DrawNodes(context);
+            UpdateNodes(context);
         }
 
     }
@@ -129,40 +131,46 @@ window.addEventListener("load", () => {
 function DrawNodes(context) {
     // Drawing a circle for each node
     nodes.splice(0, nodes.length);
-    states.forEach(node => {
-        let circle = new Circle(node.xPos, node.yPos, nodeRadius, "#9E6240", "#DEA47E", 5);
-        nodes.push(circle);
-        circle.Draw(context);
+    states.forEach(state => {
+        let node = new Node(state.x, state.y, state.name);
+        nodes.push(node);
+        node.Draw(context);
+    });
+}
+
+function UpdateNodes(context) {
+    // Drawing a circle for each node
+    nodes.forEach((node, index) => {
+        node.x = states[index].x;
+        node.y = states[index].y;
+        node.Draw(context);
     });
 }
 
 function DrawTransitionLines(context) {
     // Drawing a line for each transition from each node
     transitions.splice(0, transitions.length);
-    states.forEach((node, index) => {
-        node.transitions.forEach(otherIndex => {
+    states.forEach((state, index) => {
+        state.transitions.forEach(otherIndex => {
             const other = states[otherIndex];
-            let line = new Transition(index, otherIndex, node.xPos, node.yPos, other.xPos, other.yPos);
-            transitions.push(line);
-            line.Draw(context);
+            let transition = new Transition(index, otherIndex, state.x, state.y, other.x, other.y);
+            transitions.push(transition);
+            transition.Draw(context);
         });
     });
 }
 
 function UpdateTransitionLines(context) {
     // Drawing a line for each transition from each node
-    let index = 0;
     transitions.forEach(transition => {
         UpdateTransitionLine(transition);
         transition.Draw(context);
-
-        index++;
     });
 }
 
 function UpdateTransitionLine(transition) {
-    let startNode = nodes[transition.startNodeIndex];
-    let endNode = nodes[transition.endNodeIndex];
+    let startNode = states[transition.startNodeIndex];
+    let endNode = states[transition.endNodeIndex];
 
     transition.startXPos = startNode.x;
     transition.startYPos = startNode.y;
