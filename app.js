@@ -8,7 +8,14 @@ let states = [
         x: 100,
         y: 100,
         transitions: [
-            1, 2
+            {
+                index: 3,
+                symbols: ["a", "b", "c", "d", "e"]
+            },
+            {
+                index: 1,
+                symbols: ["c", "a"]
+            }
         ],
     },
     {
@@ -25,15 +32,15 @@ let states = [
     },
     {
         name: "3",
-        x: 100,
-        y: 400,
+        x: 400,
+        y: 100,
         transitions: [],
     },
 ]
 
 // Actual elements rendered on the canvas
 let nodes = []
-let transitions = []
+let transitionLines = []
 
 window.addEventListener("load", () => {
     const canvas = document.getElementById("canvas");
@@ -75,8 +82,8 @@ window.addEventListener("load", () => {
     }
 
     function ClickedControlPoint(x, y) {
-        transitions.forEach((transition, index) => {
-            if(utils.circlePointCollision(x, y, transition.handle)) {
+        transitionLines.forEach((transition, index) => {
+            if(utils.pointInRect(x, y, transition.handle)) {
                 dragging = index;
             } 
         });
@@ -109,8 +116,8 @@ window.addEventListener("load", () => {
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
     
-            transitions[dragging].handle.x = x;
-            transitions[dragging].handle.y = y;
+            transitionLines[dragging].handle.x = x;
+            transitionLines[dragging].handle.y = y;
 
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             UpdateTransitionLines(context);
@@ -149,20 +156,20 @@ function UpdateNodes(context) {
 
 function DrawTransitionLines(context) {
     // Drawing a line for each transition from each node
-    transitions.splice(0, transitions.length);
+    transitionLines.splice(0, transitionLines.length);
     states.forEach((state, index) => {
-        state.transitions.forEach(otherIndex => {
-            const other = states[otherIndex];
-            let transition = new Transition(index, otherIndex, state.x, state.y, other.x, other.y);
-            transitions.push(transition);
-            transition.Draw(context);
+        state.transitions.forEach(transition => {
+            const other = states[transition.index];
+            let transitionLine = new TransitionLine(index, transition.index, state.x, state.y, other.x, other.y, transition.symbols);
+            transitionLines.push(transitionLine);
+            transitionLine.Draw(context);
         });
     });
 }
 
 function UpdateTransitionLines(context) {
     // Drawing a line for each transition from each node
-    transitions.forEach(transition => {
+    transitionLines.forEach(transition => {
         UpdateTransitionLine(transition);
         transition.Draw(context);
     });

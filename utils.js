@@ -3,6 +3,10 @@ const utils = {
 		return (value - min) / (max - min);
 	},
 
+	vector: function(x, y, x1, y1) {
+		return [x - x1, y - y1];
+	},
+
 	lerp: function(norm, min, max) {
 		return (max - min) * norm + min;
 	},
@@ -36,8 +40,8 @@ const utils = {
 	},
 
 	pointInRect: function(x, y, rect) {
-		return utils.inRange(x, rect.x, rect.x + rect.width) &&
-		       utils.inRange(y, rect.y, rect.y + rect.height);
+		return utils.inRange(x, rect.x - (rect.width / 2), rect.x + (rect.width / 2)) &&
+		       utils.inRange(y, rect.y - (rect.height / 2), rect.y + (rect.height / 2));
 	},
 
 	inRange: function(value, min, max) {
